@@ -42,7 +42,7 @@ class GyroStatusBufferingService extends MessageServerService
     {
         $this->sandbox(function () {
             $gyroStatus = $this->gyroStatusRepository->getLatestStatus();
-            $this->writeInfoLine('GyroStatusBufferingService', json_encode($gyroStatus));
+            $this->writeInfoLine('GyroStatusBufferingService', json_encode($gyroStatus->toRawMessage()));
         });
     }
 
