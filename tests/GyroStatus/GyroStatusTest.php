@@ -17,7 +17,7 @@ class GyroStatusTest extends \PHPUnit_Framework_TestCase
             'pitch' => 2.22,
             'roll'  => 3.33
         ];
-        $gyroStatus = new GyroStatus(1.11, 2.22, 3.33);
+        $gyroStatus = new GyroStatus(1.11, 3.33, 2.22);
         $result = $gyroStatus->toRawMessage();
 
         self::assertInstanceOf(BaseRawMessage::class, $result);

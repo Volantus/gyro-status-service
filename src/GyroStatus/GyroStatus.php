@@ -41,10 +41,10 @@ class GyroStatus extends OutgoingMessage
      * GyroStatus constructor.
      *
      * @param float $yaw
-     * @param float $pitch
      * @param float $roll
+     * @param float $pitch
      */
-    public function __construct(float $yaw, float $pitch, float $roll)
+    public function __construct(float $yaw, float $roll, float $pitch)
     {
         $this->yaw = $yaw;
         $this->pitch = $pitch;
