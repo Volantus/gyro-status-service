@@ -23,12 +23,12 @@ class Socket
     {
         $this->connection = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
         if ($this->connection === false) {
-            throw new \RuntimeException('socket_create() failed: ' . socket_strerror(socket_last_error()));
+            throw new SocketException('socket_create() failed: ' . socket_strerror(socket_last_error()));
         }
 
         $result = socket_connect($this->connection, $address, $port);
         if ($result === false) {
-            throw new \RuntimeException("socket_connect() failed: ($result)" . socket_strerror(socket_last_error($this->connection)));
+            throw new SocketException("socket_connect() failed: ($result)" . socket_strerror(socket_last_error($this->connection)));
         }
     }
 

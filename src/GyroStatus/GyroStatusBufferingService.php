@@ -31,8 +31,8 @@ class GyroStatusBufferingService extends MessageServerService
     public function __construct(OutputInterface $output, LoopInterface $loop, MessageService $messageService = null, ClientFactory $clientFactory = null, GyroStatusRepository $gyroStatusRepository = null)
     {
         parent::__construct($output, $messageService, $clientFactory);
+        $this->connect($gyroStatusRepository);
 
-        $this->gyroStatusRepository = $gyroStatusRepository ?: new GyroStatusRepository($output);
         $loop->addPeriodicTimer(0.0001, function () {
             $this->sendStatus();
         });
@@ -40,7 +40,41 @@ class GyroStatusBufferingService extends MessageServerService
 
     public function sendStatus()
     {
-        $gyroStatus = $this->gyroStatusRepository->getLatestStatus();
-        $this->writeInfoLine('GyroStatusBufferingService', json_encode($gyroStatus));
+        $this->sandbox(function () {
+            $gyroStatus = $this->gyroStatusRepository->getLatestStatus();
+            $this->writeInfoLine('GyroStatusBufferingService', json_encode($gyroStatus));
+        });
+    }
+
+    /**
+     * @param callable $function
+     */
+    protected function sandbox(callable $function)
+    {
+        parent::sandbox(function () use ($function) {
+            try {
+                call_user_func($function);
+            } catch (SocketException $e) {
+                $this->writeErrorLine('GyroStatusBufferingService', $e->getMessage());
+                $this->gyroStatusRepository = null;
+                $this->connect();
+            }
+        });
+    }
+
+    /**
+     * @param GyroStatusRepository|null $gyroStatusRepository
+     */
+    private function connect(GyroStatusRepository $gyroStatusRepository = null)
+    {
+        while ($this->gyroStatusRepository == null) {
+            try {
+                $this->gyroStatusRepository = $gyroStatusRepository ?: new GyroStatusRepository($this->output);
+                $this->writeGreenLine('GyroStatusBufferingService', 'Connected successfully to low level gyro daemon!');
+            } catch (\RuntimeException $e) {
+                $this->writeErrorLine('GyroStatusRepository', $e->getMessage());
+                sleep(1);
+            }
+        }
     }
 }
