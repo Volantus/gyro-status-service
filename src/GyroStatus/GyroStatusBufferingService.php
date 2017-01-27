@@ -32,7 +32,7 @@ class GyroStatusBufferingService extends MessageServerService
     {
         parent::__construct($output, $messageService, $clientFactory);
 
-        $this->gyroStatusRepository = $gyroStatusRepository ?: new GyroStatusRepository();
+        $this->gyroStatusRepository = $gyroStatusRepository ?: new GyroStatusRepository($output);
         $loop->addPeriodicTimer(0.0001, function () {
             $this->sendStatus();
         });
@@ -40,6 +40,7 @@ class GyroStatusBufferingService extends MessageServerService
 
     public function sendStatus()
     {
-
+        $gyroStatus = $this->gyroStatusRepository->getLatestStatus();
+        $this->writeInfoLine('GyroStatusBufferingService', json_encode($gyroStatus));
     }
 }
