@@ -2,7 +2,7 @@
 namespace Volante\SkyBukkit\GyroStatusService\Tests\GyroStatus;
 
 use Symfony\Component\Console\Output\OutputInterface;
-use Volante\SkyBukkit\GyroStatusService\Src\GyroStatus\GyroStatus;
+use Volante\SkyBukkit\Common\Src\General\GyroStatus\GyroStatus;
 use Volante\SkyBukkit\GyroStatusService\Src\GyroStatus\GyroStatusRepository;
 use Volante\SkyBukkit\GyroStatusService\Src\GyroStatus\Socket;
 
