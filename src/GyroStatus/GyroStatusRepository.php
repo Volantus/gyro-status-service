@@ -4,6 +4,7 @@ namespace Volante\SkyBukkit\GyroStatusService\Src\GyroStatus;
 use Symfony\Component\Console\Output\OutputInterface;
 use Volante\SkyBukkit\Common\Src\General\CLI\OutputOperations;
 use Volante\SkyBukkit\Common\Src\General\GyroStatus\GyroStatus;
+use Volante\SkyBukkit\Common\Src\General\Network\Socket;
 
 /**
  * Class GyroStatusRepository
