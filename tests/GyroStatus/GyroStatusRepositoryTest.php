@@ -46,8 +46,8 @@ class GyroStatusRepositoryTest extends \PHPUnit_Framework_TestCase
 
         self::assertInstanceOf(GyroStatus::class, $result);
         self::assertEquals(1.1, $result->getYaw());
-        self::assertEquals(2.2, $result->getRoll());
-        self::assertEquals(3.3, $result->getPitch());
+        self::assertEquals(2.2, $result->getPitch());
+        self::assertEquals(3.3, $result->getRoll());
     }
 
     public function test_getLatestStatus_multipleSegments_latestSegmentOnlyAndLogMessage()
@@ -63,8 +63,8 @@ class GyroStatusRepositoryTest extends \PHPUnit_Framework_TestCase
         $result = $this->repository->getLatestStatus();
         self::assertInstanceOf(GyroStatus::class, $result);
         self::assertEquals(1.1, $result->getYaw());
-        self::assertEquals(2.2, $result->getRoll());
-        self::assertEquals(3.3, $result->getPitch());
+        self::assertEquals(2.2, $result->getPitch());
+        self::assertEquals(3.3, $result->getRoll());
     }
 
     /**
