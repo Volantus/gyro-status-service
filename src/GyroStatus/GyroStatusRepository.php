@@ -61,6 +61,6 @@ class GyroStatusRepository
             }
         }
 
-        return new GyroStatus((float) $values[0], (float) $values[2], (float) $values[1]);
+        return new GyroStatus((float) $values[0], (float) $values[2], -((float) $values[1]));
     }
 }

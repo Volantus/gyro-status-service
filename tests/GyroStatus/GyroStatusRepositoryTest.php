@@ -41,7 +41,7 @@ class GyroStatusRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->outputInterface->expects(self::never())->method('writeln');
         $this->outputInterface->expects(self::never())->method('write');
         $this->socket->expects(self::once())->method('listen')
-            ->willReturn('1.1 2.2 3.3,abc');
+            ->willReturn('1.1 -2.2 3.3,abc');
         $result = $this->repository->getLatestStatus();
 
         self::assertInstanceOf(GyroStatus::class, $result);
@@ -58,7 +58,7 @@ class GyroStatusRepositoryTest extends \PHPUnit_Framework_TestCase
             }));
 
         $this->socket->expects(self::once())->method('listen')
-            ->willReturn('0 0 0,1.1 2.2 3.3,abc');
+            ->willReturn('0 0 0,1.1 -2.2 3.3,abc');
 
         $result = $this->repository->getLatestStatus();
         self::assertInstanceOf(GyroStatus::class, $result);
