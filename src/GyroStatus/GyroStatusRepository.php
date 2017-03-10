@@ -21,15 +21,22 @@ class GyroStatusRepository
     private $socket;
 
     /**
+     * @var GyroStatus
+     */
+    private $zeroLevel;
+
+    /**
      * GyroStatusRepository constructor.
      *
      * @param OutputInterface $output
+     * @param GyroStatus      $zeroLevel
      * @param Socket          $socket
      */
-    public function __construct(OutputInterface $output, Socket $socket = null)
+    public function __construct(OutputInterface $output, GyroStatus $zeroLevel, Socket $socket = null)
     {
         $this->socket = $socket ?: new Socket('127.0.0.1', 5555);
         $this->output = $output;
+        $this->zeroLevel = $zeroLevel;
     }
 
     /**
@@ -61,6 +68,10 @@ class GyroStatusRepository
             }
         }
 
-        return new GyroStatus((float) $values[0], (float) $values[2], -((float) $values[1]));
+        $yaw  = ((float) $values[0]) - $this->zeroLevel->getYaw();
+        $roll = ((float) $values[2]) - $this->zeroLevel->getRoll();
+        $pitch = (-(float) $values[1]) - $this->zeroLevel->getPitch();
+
+        return new GyroStatus($yaw, $roll, $pitch);
     }
 }

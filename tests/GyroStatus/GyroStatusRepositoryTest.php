@@ -33,7 +33,7 @@ class GyroStatusRepositoryTest extends \PHPUnit_Framework_TestCase
         $this->socket = $this->getMockBuilder(Socket::class)->disableOriginalConstructor()->getMock();
         $this->outputInterface = $this->getMockBuilder(OutputInterface::class)->disableOriginalConstructor()->getMock();
 
-        $this->repository = new GyroStatusRepository($this->outputInterface, $this->socket);
+        $this->repository = new GyroStatusRepository($this->outputInterface, new GyroStatus(0, 0, 0), $this->socket);
     }
 
     public function test_getLatestStatus_singleSegment_correct()
@@ -49,6 +49,23 @@ class GyroStatusRepositoryTest extends \PHPUnit_Framework_TestCase
         self::assertEquals(2.2, $result->getPitch());
         self::assertEquals(3.3, $result->getRoll());
     }
+
+    public function test_getLatestStatus_zeroLevelApplied()
+    {
+        $this->repository = new GyroStatusRepository($this->outputInterface, new GyroStatus(10, 20, 30), $this->socket);
+
+        $this->outputInterface->expects(self::never())->method('writeln');
+        $this->outputInterface->expects(self::never())->method('write');
+        $this->socket->expects(self::once())->method('listen')
+            ->willReturn('1.1 -2.2 3.3,abc');
+        $result = $this->repository->getLatestStatus();
+
+        self::assertInstanceOf(GyroStatus::class, $result);
+        self::assertEquals(1.1 - 10, $result->getYaw());
+        self::assertEquals(2.2 - 30, $result->getPitch());
+        self::assertEquals(3.3 - 20, $result->getRoll());
+    }
+
 
     public function test_getLatestStatus_multipleSegments_latestSegmentOnlyAndLogMessage()
     {
