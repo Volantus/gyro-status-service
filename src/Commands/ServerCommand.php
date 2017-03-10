@@ -29,7 +29,7 @@ class ServerCommand extends Command
         $this->addOption('port', 'p', InputArgument::OPTIONAL, 'Port of the webSocket', 5002);
 
         $this->addOption('zeroYaw', 'y', InputArgument::OPTIONAL, 'Zero yaw level', 0);
-        $this->addOption('zeroPitch', 'p', InputArgument::OPTIONAL, 'Zero pitch level', 0);
+        $this->addOption('zeroPitch', 'i', InputArgument::OPTIONAL, 'Zero pitch level', 0);
         $this->addOption('zeroRoll', 'r', InputArgument::OPTIONAL, 'Zero roll level', 0);
     }
 
