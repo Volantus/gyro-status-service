@@ -44,7 +44,7 @@ class ServerCommand extends Command
         $socket = new Reactor($loop);
         $socket->listen($input->getOption('port'), '127.0.0.1');
 
-        $repository = new GyroStatusRepository($output, new GyroStatus($input->getOption('zeroYaw'), $input->getOption('zeroRoll'), $input->getOption('zeroPitch')));
+        $repository = new GyroStatusRepository($output, new GyroStatus((float) $input->getOption('zeroYaw'), (float) $input->getOption('zeroRoll'), (float) $input->getOption('zeroPitch')));
         $service = new GyroStatusBufferingService($output, $loop, null, null, $repository);
         $controller = new Controller($output, $service);
 
