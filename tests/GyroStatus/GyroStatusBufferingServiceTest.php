@@ -3,12 +3,12 @@ namespace Volante\SkyBukkit\GyroStatusService\Tests\GyroStatus;
 
 use React\EventLoop\LoopInterface;
 use Ratchet\ConnectionInterface;
-use Volante\SkyBukkit\Common\Src\General\GyroStatus\GyroStatus;
-use Volante\SkyBukkit\Common\Src\General\Role\ClientRole;
-use Volante\SkyBukkit\Common\Src\Server\Messaging\MessageServerService;
-use Volante\SkyBukkit\Common\Src\Server\Network\Client;
-use Volante\SkyBukkit\Common\Tests\Server\General\DummyConnection;
-use Volante\SkyBukkit\Common\Tests\Server\Messaging\MessageServerServiceTest;
+use Volantus\FlightBase\Src\General\GyroStatus\GyroStatus;
+use Volantus\FlightBase\Src\General\Role\ClientRole;
+use Volantus\FlightBase\Src\Server\Messaging\MessageServerService;
+use Volantus\FlightBase\Src\Server\Network\Client;
+use Volantus\FlightBase\Tests\Server\General\DummyConnection;
+use Volantus\FlightBase\Tests\Server\Messaging\MessageServerServiceTest;
 use Volante\SkyBukkit\GyroStatusService\Src\GyroStatus\GyroStatusBufferingService;
 use Volante\SkyBukkit\GyroStatusService\Src\GyroStatus\GyroStatusRepository;
 
