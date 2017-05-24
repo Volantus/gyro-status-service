@@ -8,7 +8,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Volante\SkyBukkit\Common\Src\General\GyroStatus\GyroStatus;
+use Volantus\FlightBase\Src\General\GyroStatus\GyroStatus;
 use Volante\SkyBukkit\GyroStatusService\Src\Controller;
 use React\EventLoop\Factory as LoopFactory;
 use React\Socket\Server as Reactor;
