@@ -1,7 +1,7 @@
 <?php
 use Dotenv\Dotenv;
 use Symfony\Component\Console\Application;
-use Volante\SkyBukkit\GyroStatusService\Src\Commands\ServerCommand;
+use Volantus\GyroStatusService\Src\Commands\ServerCommand;
 
 require __DIR__.'/vendor/autoload.php';
 

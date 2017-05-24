@@ -1,15 +1,15 @@
 <?php
-namespace Volante\SkyBukkit\GyroStatusService\Tests\GyroStatus;
+namespace Volantus\GyroStatusService\Tests\GyroStatus;
 
 use Symfony\Component\Console\Output\OutputInterface;
 use Volantus\FlightBase\Src\General\GyroStatus\GyroStatus;
 use Volantus\FlightBase\Src\General\Network\Socket;
-use Volante\SkyBukkit\GyroStatusService\Src\GyroStatus\GyroStatusRepository;
+use Volantus\GyroStatusService\Src\GyroStatus\GyroStatusRepository;
 
 /**
  * Class GyroStatusRepositoryTest
  *
- * @package Volante\SkyBukkit\GyroStatusService\Tests\GyroStatus
+ * @package Volantus\GyroStatusService\Tests\GyroStatus
  */
 class GyroStatusRepositoryTest extends \PHPUnit_Framework_TestCase
 {

@@ -1,5 +1,5 @@
 <?php
-namespace Volante\SkyBukkit\GyroStatusService\Src\GyroStatus;
+namespace Volantus\GyroStatusService\Src\GyroStatus;
 
 use Symfony\Component\Console\Output\OutputInterface;
 use Volantus\FlightBase\Src\General\CLI\OutputOperations;
@@ -9,7 +9,7 @@ use Volantus\FlightBase\Src\General\Network\Socket;
 /**
  * Class GyroStatusRepository
  *
- * @package Volante\SkyBukkit\GyroStatusService\Src\GyroStatus
+ * @package Volantus\GyroStatusService\Src\GyroStatus
  */
 class GyroStatusRepository
 {
