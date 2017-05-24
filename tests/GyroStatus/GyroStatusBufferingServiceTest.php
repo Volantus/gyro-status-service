@@ -1,5 +1,5 @@
 <?php
-namespace Volante\SkyBukkit\GyroStatusService\Tests\GyroStatus;
+namespace Volantus\GyroStatusService\Tests\GyroStatus;
 
 use React\EventLoop\LoopInterface;
 use Ratchet\ConnectionInterface;
@@ -9,13 +9,13 @@ use Volantus\FlightBase\Src\Server\Messaging\MessageServerService;
 use Volantus\FlightBase\Src\Server\Network\Client;
 use Volantus\FlightBase\Tests\Server\General\DummyConnection;
 use Volantus\FlightBase\Tests\Server\Messaging\MessageServerServiceTest;
-use Volante\SkyBukkit\GyroStatusService\Src\GyroStatus\GyroStatusBufferingService;
-use Volante\SkyBukkit\GyroStatusService\Src\GyroStatus\GyroStatusRepository;
+use Volantus\GyroStatusService\Src\GyroStatus\GyroStatusBufferingService;
+use Volantus\GyroStatusService\Src\GyroStatus\GyroStatusRepository;
 
 /**
  * Class GyroStatusBufferingServiceTest
  *
- * @package Volante\SkyBukkit\GyroStatusService\Tests\GyroStatus
+ * @package Volantus\GyroStatusService\Tests\GyroStatus
  */
 class GyroStatusBufferingServiceTest extends MessageServerServiceTest
 {

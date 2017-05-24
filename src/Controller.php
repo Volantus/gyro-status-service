@@ -1,12 +1,12 @@
 <?php
-namespace Volante\SkyBukkit\GyroStatusService\Src;
+namespace Volantus\GyroStatusService\Src;
 
 use Symfony\Component\Console\Output\OutputInterface;
-use Volante\SkyBukkit\GyroStatusService\Src\GyroStatus\GyroStatusBufferingService;
+use Volantus\GyroStatusService\Src\GyroStatus\GyroStatusBufferingService;
 
 /**
  * Class Controller
- * @package Volante\SkyBukkit\GeoPositionService\Src
+ * @package Volantus\GeoPositionService\Src
  */
 class Controller extends \Volantus\FlightBase\Src\Server\Controller
 {

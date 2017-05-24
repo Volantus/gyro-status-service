@@ -1,5 +1,5 @@
 <?php
-namespace Volante\SkyBukkit\GyroStatusService\Src\Commands;
+namespace Volantus\GyroStatusService\Src\Commands;
 
 use Ratchet\Http\HttpServer;
 use Ratchet\Server\IoServer;
@@ -9,15 +9,15 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Volantus\FlightBase\Src\General\GyroStatus\GyroStatus;
-use Volante\SkyBukkit\GyroStatusService\Src\Controller;
+use Volantus\GyroStatusService\Src\Controller;
 use React\EventLoop\Factory as LoopFactory;
 use React\Socket\Server as Reactor;
-use Volante\SkyBukkit\GyroStatusService\Src\GyroStatus\GyroStatusBufferingService;
-use Volante\SkyBukkit\GyroStatusService\Src\GyroStatus\GyroStatusRepository;
+use Volantus\GyroStatusService\Src\GyroStatus\GyroStatusBufferingService;
+use Volantus\GyroStatusService\Src\GyroStatus\GyroStatusRepository;
 
 /**
  * Class ServerCommand
- * @package Volante\SkyBukkit\GeoPositionService\Src\Commands
+ * @package Volantus\GeoPositionService\Src\Commands
  */
 class ServerCommand extends Command
 {

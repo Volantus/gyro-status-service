@@ -1,0 +1,29 @@
+{
+  "name": "volantus/gyro-status-service",
+  "description": "Determines and buffers the gyroscope status",
+  "type": "project",
+  "license": "GNUv3",
+  "authors": [
+    {
+      "name": "Marius Meißner",
+      "email": "info@marius-meissner.net"
+    }
+  ],
+  "minimum-stability": "stable",
+  "require": {
+    "nesbot/carbon": "^1.21",
+    "symfony/console": "^3.2",
+    "nykopol/gpsd-client": "1.*",
+    "vlucas/phpdotenv": "^2.4",
+    "volantus/flight-base": "^1.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^5.7"
+  },
+  "autoload": {
+    "psr-4": {
+      "Volantus\\GyroStatusService\\Src\\": "src",
+      "Volantus\\GyroStatusService\\Tests\\": "tests"
+    }
+  }
+}

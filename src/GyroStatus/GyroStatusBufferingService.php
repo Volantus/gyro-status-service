@@ -1,5 +1,5 @@
 <?php
-namespace Volante\SkyBukkit\GyroStatusService\Src\GyroStatus;
+namespace Volantus\GyroStatusService\Src\GyroStatus;
 
 use React\EventLoop\LoopInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -10,7 +10,7 @@ use Volantus\FlightBase\Src\Server\Network\ClientFactory;
 /**
  * Class GyroStatusBufferingService
  *
- * @package Volante\SkyBukkit\GyroStatusService\Src\GyroStatus
+ * @package Volantus\GyroStatusService\Src\GyroStatus
  */
 class GyroStatusBufferingService extends MessageServerService
 {
