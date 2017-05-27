@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "a9bda6275267cc9ab4793ba1dc8a3e27",
-    "content-hash": "4100e8050a98ebd9fd455e19ddb3649e",
+    "hash": "f1f3096f6ecc64d41df43f76cb4ba6db",
+    "content-hash": "9a0b2a244401e5d45e7079cd0e0cecff",
     "packages": [
         {
             "name": "cboden/ratchet",
@@ -516,40 +516,6 @@
                 "time"
             ],
             "time": "2017-01-16 07:55:07"
-        },
-        {
-            "name": "nykopol/gpsd-client",
-            "version": "1.0",
-            "target-dir": "Nykopol/GpsdClient",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/nykopol/gpsd-client.git",
-                "reference": "16c5ede65af9e3b5fdaa04c52e1810c280f3a72f"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/nykopol/gpsd-client/zipball/16c5ede65af9e3b5fdaa04c52e1810c280f3a72f",
-                "reference": "16c5ede65af9e3b5fdaa04c52e1810c280f3a72f",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "Nykopol\\GpsdClient": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "authors": [
-                {
-                    "name": "Johan DESMYTER",
-                    "email": "johan@etic.yt"
-                }
-            ],
-            "description": "Client class for GPSD service",
-            "time": "2014-11-11 05:33:01"
         },
         {
             "name": "phpdocumentor/reflection-common",
@@ -2732,16 +2698,16 @@
         },
         {
             "name": "volantus/flight-base",
-            "version": "1.1.0",
+            "version": "1.2.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Volantus/flight-base.git",
-                "reference": "8f8ec67ddf171ebf28f986554b8bcbb881261c1f"
+                "reference": "2c28c34e660a0dae6ed42c37326ce95492fb3541"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Volantus/flight-base/zipball/8f8ec67ddf171ebf28f986554b8bcbb881261c1f",
-                "reference": "8f8ec67ddf171ebf28f986554b8bcbb881261c1f",
+                "url": "https://api.github.com/repos/Volantus/flight-base/zipball/2c28c34e660a0dae6ed42c37326ce95492fb3541",
+                "reference": "2c28c34e660a0dae6ed42c37326ce95492fb3541",
                 "shasum": ""
             },
             "require": {
@@ -2749,7 +2715,8 @@
                 "nesbot/carbon": "^1.21",
                 "phpunit/phpunit": "^5.7",
                 "ratchet/pawl": "^0.2.3",
-                "symfony/console": "^3.2"
+                "symfony/console": "^3.2",
+                "volantus/msp-protocol": "^1.0"
             },
             "type": "library",
             "autoload": {
@@ -2769,7 +2736,45 @@
                 }
             ],
             "description": "Base library for all Volantus flight stack modules",
-            "time": "2017-05-27 14:17:28"
+            "time": "2017-05-27 18:20:19"
+        },
+        {
+            "name": "volantus/msp-protocol",
+            "version": "1.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Volantus/msp-protocol.git",
+                "reference": "a28dd8aef55f8e5a9e9a5c6c7959837f22c34fc8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Volantus/msp-protocol/zipball/a28dd8aef55f8e5a9e9a5c6c7959837f22c34fc8",
+                "reference": "a28dd8aef55f8e5a9e9a5c6c7959837f22c34fc8",
+                "shasum": ""
+            },
+            "require": {
+                "phpunit/phpunit": "^5.7"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Volantus\\MSPProtocol\\": "",
+                    "Volantus\\MSPProtocol\\Src\\": "src",
+                    "Volantus\\MSPProtocol\\Tests\\": "tests"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GNUv3"
+            ],
+            "authors": [
+                {
+                    "name": "Marius Meißner",
+                    "email": "info@marius-meissner.net"
+                }
+            ],
+            "description": "PHP implementation of the SMP protocol + serial communication adapter",
+            "time": "2017-05-27 20:16:03"
         },
         {
             "name": "webmozart/assert",
