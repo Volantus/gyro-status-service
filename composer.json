@@ -13,7 +13,6 @@
   "require": {
     "nesbot/carbon": "^1.21",
     "symfony/console": "^3.2",
-    "nykopol/gpsd-client": "1.*",
     "vlucas/phpdotenv": "^2.4",
     "volantus/flight-base": "^1.0"
   },
