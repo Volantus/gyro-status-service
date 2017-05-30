@@ -1,11 +1,11 @@
 <?php
 namespace Volantus\GyroStatusService\Src\GyroStatus;
 
+use Volantus\FlightBase\Src\Client\Server;
 use Volantus\FlightBase\Src\General\Generic\GenericInternalMessage;
 use Volantus\FlightBase\Src\General\GyroStatus\GyroStatus;
 use Volantus\FlightBase\Src\General\MSP\MSPRequestMessage;
 use Volantus\FlightBase\Src\General\MSP\MSPResponseMessage;
-use Volantus\FlightBase\Src\Server\Messaging\Sender;
 use Volantus\MSPProtocol\Src\Protocol\Request\Attitude as AttitudeRequest;
 use Volantus\MSPProtocol\Src\Protocol\Response\Attitude as AttitudeResponse;
 
@@ -17,75 +17,87 @@ use Volantus\MSPProtocol\Src\Protocol\Response\Attitude as AttitudeResponse;
 class GyroStatusRepository
 {
     /**
-     * @var Sender
+     * Connections ready for MSP requests
+     *
+     * @var Server[]
      */
-    private $connection;
+    private $freeConnections = [];
 
     /**
-     * @var bool
+     * @var GyroStatus[]
      */
-    private $requestInProgress = false;
-
-    /**
-     * @var GyroStatus
-     */
-    private $currentGyroStatus;
+    private $currentGyroStatus = [];
 
     /**
      * GyroStatusRepository constructor.
      *
-     * @param Sender|null $connection
+     * @param Server[] $connections
      */
-    public function __construct(Sender $connection = null)
+    public function __construct(array $connections = [])
     {
-        $this->connection = $connection;
+        foreach ($connections as $connection) {
+            $this->addServer($connection);
+        }
     }
 
     public function fetchGyroStatus()
     {
-        if ($this->connection && !$this->requestInProgress) {
-            $this->requestInProgress = true;
-
+        if (!empty($this->freeConnections)) {
             $request = new MSPRequestMessage(3, new AttitudeRequest());
             $request = new GenericInternalMessage($request);
             $request = $request->toRawMessage();
-            $this->connection->send(json_encode($request));
+            $request = json_encode($request);
+
+            foreach ($this->freeConnections as $objHash => $connection) {
+                $connection->send($request);
+                unset($this->freeConnections[$objHash]);
+            }
         }
     }
 
     /**
+     * @param Server             $server
      * @param MSPResponseMessage $message
      *
      * @return GyroStatus
      */
-    public function onMspResponse(MSPResponseMessage $message): GyroStatus
+    public function onMspResponse(Server $server, MSPResponseMessage $message): GyroStatus
     {
-        $this->requestInProgress = false;
+        $objHash = spl_object_hash($server);
+        $this->freeConnections[$objHash] = $server;
 
         /** @var AttitudeResponse $attitudeResponse */
         $attitudeResponse = $message->getMspResponse();
-        $this->currentGyroStatus = new GyroStatus(
+        $this->currentGyroStatus[$objHash] = new GyroStatus(
             $attitudeResponse->getHeading(),
             $attitudeResponse->getYAngle() / 10,
             $attitudeResponse->getXAngle() / 10
         );
 
-        return $this->currentGyroStatus;
+        return $this->currentGyroStatus[$objHash];
     }
 
     /**
-     * @param Sender $connection
+     * @param Server $server
      */
-    public function setConnection(Sender $connection = null)
+    public function addServer(Server $server)
     {
-        $this->connection = $connection;
+        $this->freeConnections[spl_object_hash($server)] = $server;
     }
 
     /**
-     * @return GyroStatus
+     * @param Server $server
      */
-    public function getCurrentGyroStatus(): GyroStatus
+    public function removeServer(Server $server)
     {
-        return $this->currentGyroStatus;
+        unset($this->freeConnections[spl_object_hash($server)]);
+    }
+
+    /**
+     * @return GyroStatus[]
+     */
+    public function getCurrentGyroStatus(): array
+    {
+        return array_values($this->currentGyroStatus);
     }
 }
