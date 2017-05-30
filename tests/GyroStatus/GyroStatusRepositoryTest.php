@@ -1,11 +1,11 @@
 <?php
 namespace Volantus\GyroStatusService\Tests\GyroStatus;
 
-use Volantus\FlightBase\Src\General\Generic\GenericInternalMessage;
+use Ratchet\Client\WebSocket;
+use Volantus\FlightBase\Src\Client\Server;
 use Volantus\FlightBase\Src\General\GyroStatus\GyroStatus;
 use Volantus\FlightBase\Src\General\MSP\MSPRequestMessage;
 use Volantus\FlightBase\Src\General\MSP\MSPResponseMessage;
-use Volantus\FlightBase\Src\Server\Messaging\Sender;
 use Volantus\GyroStatusService\Src\GyroStatus\GyroStatusRepository;
 use Volantus\MSPProtocol\Src\Protocol\Request\Attitude;
 use Volantus\MSPProtocol\Src\Protocol\Response\Attitude as AttitudeResponse;
@@ -18,9 +18,24 @@ use Volantus\MSPProtocol\Src\Protocol\Response\Attitude as AttitudeResponse;
 class GyroStatusRepositoryTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var Sender|\PHPUnit_Framework_MockObject_MockObject
+     * @var WebSocket|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $connection;
+    private $connectionA;
+
+    /**
+     * @var Server
+     */
+    private $serverA;
+
+    /**
+     * @var WebSocket|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $connectionB;
+
+    /**
+     * @var Server
+     */
+    private $serverB;
 
     /**
      * @var GyroStatusRepository
@@ -29,41 +44,66 @@ class GyroStatusRepositoryTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->connection = $this->getMockBuilder(Sender::class)->disableOriginalConstructor()->getMock();
-        $this->repository = new GyroStatusRepository($this->connection);
+        $this->connectionA = $this->getMockBuilder(WebSocket::class)->disableOriginalConstructor()->getMock();
+        $this->connectionB = $this->getMockBuilder(WebSocket::class)->disableOriginalConstructor()->getMock();
+        $this->serverA = new Server($this->connectionA, Server::ROLE_RELAY_SERVER_A);
+        $this->serverB = new Server($this->connectionB, Server::ROLE_RELAY_SERVER_B);
+
+        $this->repository = new GyroStatusRepository([$this->serverA, $this->serverB]);
     }
 
     public function test_fetchGyroStatus_mspRequestCorrect()
     {
-        $this->connection->expects(self::once())
-            ->method('send')
-            ->willReturnCallback(function (string $data) {
-                $data = json_decode($data, true);
-                self::assertArrayHasKey('data', $data);
-                self::assertNotEmpty($data['data']);
+        $callback = function (string $data) {
+            $data = json_decode($data, true);
+            self::assertArrayHasKey('data', $data);
+            self::assertNotEmpty($data['data']);
 
-                /** @var MSPRequestMessage $mspMessage */
-                $mspMessage = unserialize($data['data'][0]);
-                self::assertInstanceOf(MSPRequestMessage::class, $mspMessage);
-                self::assertEquals(new Attitude(), $mspMessage->getMspRequest());
-                self::assertEquals(3, $mspMessage->getPriority());
-            });
+            /** @var MSPRequestMessage $mspMessage */
+            $mspMessage = unserialize($data['data'][0]);
+            self::assertInstanceOf(MSPRequestMessage::class, $mspMessage);
+            self::assertEquals(new Attitude(), $mspMessage->getMspRequest());
+            self::assertEquals(3, $mspMessage->getPriority());
+        };
+
+        $this->connectionA->expects(self::once())
+            ->method('send')
+            ->willReturnCallback($callback);
+
+        $this->connectionB->expects(self::once())
+            ->method('send')
+            ->willReturnCallback($callback);
 
         $this->repository->fetchGyroStatus();
     }
 
     public function test_fetchGyroStatus_noConnection()
     {
-        $this->repository->setConnection(null);
+        $this->repository->removeServer($this->serverA);
 
-        $this->connection->expects(self::never())->method('send');
+        $this->connectionA->expects(self::never())->method('send');
         $this->repository->fetchGyroStatus();
     }
 
-    public function test_fetchGyroStatus_requestInProgress()
+    public function test_fetchGyroStatus_requestInProgress_bothConnections()
     {
         $this->repository->fetchGyroStatus();
-        $this->connection->expects(self::never())->method('send');
+        $this->connectionA->expects(self::never())->method('send');
+        $this->connectionB->expects(self::never())->method('send');
+        $this->repository->fetchGyroStatus();
+    }
+
+    public function test_fetchGyroStatus_requestInProgress_oneConnections()
+    {
+        /** @var AttitudeResponse|\PHPUnit_Framework_MockObject_MockObject $attitudeResponse */
+        $attitudeResponse = $this->getMockBuilder(AttitudeResponse::class)->disableOriginalConstructor()->getMock();
+        $message = new MSPResponseMessage('test', $attitudeResponse);
+
+        $this->repository->fetchGyroStatus();
+        $this->repository->onMspResponse($this->serverB, $message);
+
+        $this->connectionA->expects(self::never())->method('send');
+        $this->connectionB->expects(self::once())->method('send');
         $this->repository->fetchGyroStatus();
     }
 
@@ -76,7 +116,7 @@ class GyroStatusRepositoryTest extends \PHPUnit_Framework_TestCase
         $attitudeResponse->method('getHeading')->willReturn(120);
 
         $message = new MSPResponseMessage('test', $attitudeResponse);
-        $result = $this->repository->onMspResponse($message);
+        $result = $this->repository->onMspResponse($this->serverA, $message);
 
         self::assertInstanceOf(GyroStatus::class, $result);
         self::assertEquals(-152.5, $result->getPitch());
@@ -91,9 +131,9 @@ class GyroStatusRepositoryTest extends \PHPUnit_Framework_TestCase
         /** @var AttitudeResponse|\PHPUnit_Framework_MockObject_MockObject $attitudeResponse */
         $attitudeResponse = $this->getMockBuilder(AttitudeResponse::class)->disableOriginalConstructor()->getMock();
         $message = new MSPResponseMessage('test', $attitudeResponse);
-        $this->repository->onMspResponse($message);
+        $this->repository->onMspResponse($this->serverA, $message);
 
-        $this->connection->expects(self::once())->method('send');
+        $this->connectionA->expects(self::once())->method('send');
 
         $this->repository->fetchGyroStatus();
     }
