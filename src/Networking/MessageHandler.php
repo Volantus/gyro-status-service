@@ -59,6 +59,7 @@ class MessageHandler extends ClientService
             if ($payload->getMspResponse() instanceof Attitude) {
                 $gyroStatus = $this->repository->onMspResponse($server, $payload);
                 $this->sendGyroStatus($gyroStatus);
+                $this->writeGreenLine('MessageHandler', 'Received MSP attitude response from server ' . $server->getRole());
             }
         }
     }
@@ -112,6 +113,7 @@ class MessageHandler extends ClientService
 
         $this->loop->addPeriodicTimer(0.1, function () {
            $this->repository->fetchGyroStatus();
+            $this->writeInfoLine('MessageHandler', 'Sent MSP request for attitude');
         });
     }
 }
