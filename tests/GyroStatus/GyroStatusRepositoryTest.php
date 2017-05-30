@@ -1,10 +1,14 @@
 <?php
 namespace Volantus\GyroStatusService\Tests\GyroStatus;
 
-use Symfony\Component\Console\Output\OutputInterface;
+use Ratchet\Client\WebSocket;
+use Volantus\FlightBase\Src\Client\Server;
 use Volantus\FlightBase\Src\General\GyroStatus\GyroStatus;
-use Volantus\FlightBase\Src\General\Network\Socket;
+use Volantus\FlightBase\Src\General\MSP\MSPRequestMessage;
+use Volantus\FlightBase\Src\General\MSP\MSPResponseMessage;
 use Volantus\GyroStatusService\Src\GyroStatus\GyroStatusRepository;
+use Volantus\MSPProtocol\Src\Protocol\Request\Attitude;
+use Volantus\MSPProtocol\Src\Protocol\Response\Attitude as AttitudeResponse;
 
 /**
  * Class GyroStatusRepositoryTest
@@ -14,133 +18,123 @@ use Volantus\GyroStatusService\Src\GyroStatus\GyroStatusRepository;
 class GyroStatusRepositoryTest extends \PHPUnit_Framework_TestCase
 {
     /**
+     * @var WebSocket|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $connectionA;
+
+    /**
+     * @var Server
+     */
+    private $serverA;
+
+    /**
+     * @var WebSocket|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $connectionB;
+
+    /**
+     * @var Server
+     */
+    private $serverB;
+
+    /**
      * @var GyroStatusRepository
      */
     private $repository;
 
-    /**
-     * @var OutputInterface|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $outputInterface;
-
-    /**
-     * @var Socket|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $socket;
-
     protected function setUp()
     {
-        $this->socket = $this->getMockBuilder(Socket::class)->disableOriginalConstructor()->getMock();
-        $this->outputInterface = $this->getMockBuilder(OutputInterface::class)->disableOriginalConstructor()->getMock();
+        $this->connectionA = $this->getMockBuilder(WebSocket::class)->disableOriginalConstructor()->getMock();
+        $this->connectionB = $this->getMockBuilder(WebSocket::class)->disableOriginalConstructor()->getMock();
+        $this->serverA = new Server($this->connectionA, Server::ROLE_RELAY_SERVER_A);
+        $this->serverB = new Server($this->connectionB, Server::ROLE_RELAY_SERVER_B);
 
-        $this->repository = new GyroStatusRepository($this->outputInterface, new GyroStatus(0, 0, 0), $this->socket);
+        $this->repository = new GyroStatusRepository([$this->serverA, $this->serverB]);
     }
 
-    public function test_getLatestStatus_singleSegment_correct()
+    public function test_fetchGyroStatus_mspRequestCorrect()
     {
-        $this->outputInterface->expects(self::never())->method('writeln');
-        $this->outputInterface->expects(self::never())->method('write');
-        $this->socket->expects(self::once())->method('listen')
-            ->willReturn('1.1 -2.2 3.3,abc');
-        $result = $this->repository->getLatestStatus();
+        $callback = function (string $data) {
+            $data = json_decode($data, true);
+            self::assertArrayHasKey('data', $data);
+            self::assertNotEmpty($data['data']);
+
+            /** @var MSPRequestMessage $mspMessage */
+            $mspMessage = unserialize($data['data'][0]);
+            self::assertInstanceOf(MSPRequestMessage::class, $mspMessage);
+            self::assertEquals(new Attitude(), $mspMessage->getMspRequest());
+            self::assertEquals(3, $mspMessage->getPriority());
+        };
+
+        $this->connectionA->expects(self::once())
+            ->method('send')
+            ->willReturnCallback($callback);
+
+        $this->connectionB->expects(self::once())
+            ->method('send')
+            ->willReturnCallback($callback);
+
+        $this->repository->fetchGyroStatus();
+    }
+
+    public function test_fetchGyroStatus_noConnection()
+    {
+        $this->repository->removeServer($this->serverA);
+
+        $this->connectionA->expects(self::never())->method('send');
+        $this->repository->fetchGyroStatus();
+    }
+
+    public function test_fetchGyroStatus_requestInProgress_bothConnections()
+    {
+        $this->repository->fetchGyroStatus();
+        $this->connectionA->expects(self::never())->method('send');
+        $this->connectionB->expects(self::never())->method('send');
+        $this->repository->fetchGyroStatus();
+    }
+
+    public function test_fetchGyroStatus_requestInProgress_oneConnections()
+    {
+        /** @var AttitudeResponse|\PHPUnit_Framework_MockObject_MockObject $attitudeResponse */
+        $attitudeResponse = $this->getMockBuilder(AttitudeResponse::class)->disableOriginalConstructor()->getMock();
+        $message = new MSPResponseMessage('test', $attitudeResponse);
+
+        $this->repository->fetchGyroStatus();
+        $this->repository->onMspResponse($this->serverB, $message);
+
+        $this->connectionA->expects(self::never())->method('send');
+        $this->connectionB->expects(self::once())->method('send');
+        $this->repository->fetchGyroStatus();
+    }
+
+    public function test_onMspResponse_decodedCorrectly()
+    {
+        /** @var AttitudeResponse|\PHPUnit_Framework_MockObject_MockObject $attitudeResponse */
+        $attitudeResponse = $this->getMockBuilder(AttitudeResponse::class)->disableOriginalConstructor()->getMock();
+        $attitudeResponse->method('getXAngle')->willReturn(-1525);
+        $attitudeResponse->method('getYAngle')->willReturn(700);
+        $attitudeResponse->method('getHeading')->willReturn(120);
+
+        $message = new MSPResponseMessage('test', $attitudeResponse);
+        $result = $this->repository->onMspResponse($this->serverA, $message);
 
         self::assertInstanceOf(GyroStatus::class, $result);
-        self::assertEquals(1.1, $result->getYaw());
-        self::assertEquals(2.2, $result->getPitch());
-        self::assertEquals(3.3, $result->getRoll());
+        self::assertEquals(-152.5, $result->getPitch());
+        self::assertEquals(70, $result->getRoll());
+        self::assertEquals(120, $result->getYaw());
     }
 
-    public function test_getLatestStatus_zeroLevelApplied()
+    public function test_onMspResponse_requestLockFreed()
     {
-        $this->repository = new GyroStatusRepository($this->outputInterface, new GyroStatus(10, 20, 30), $this->socket);
+        $this->repository->fetchGyroStatus();
 
-        $this->outputInterface->expects(self::never())->method('writeln');
-        $this->outputInterface->expects(self::never())->method('write');
-        $this->socket->expects(self::once())->method('listen')
-            ->willReturn('1.1 -2.2 3.3,abc');
-        $result = $this->repository->getLatestStatus();
+        /** @var AttitudeResponse|\PHPUnit_Framework_MockObject_MockObject $attitudeResponse */
+        $attitudeResponse = $this->getMockBuilder(AttitudeResponse::class)->disableOriginalConstructor()->getMock();
+        $message = new MSPResponseMessage('test', $attitudeResponse);
+        $this->repository->onMspResponse($this->serverA, $message);
 
-        self::assertInstanceOf(GyroStatus::class, $result);
-        self::assertEquals(1.1 - 10, $result->getYaw());
-        self::assertEquals(2.2 - 30, $result->getPitch());
-        self::assertEquals(3.3 - 20, $result->getRoll());
-    }
+        $this->connectionA->expects(self::once())->method('send');
 
-
-    public function test_getLatestStatus_multipleSegments_latestSegmentOnlyAndLogMessage()
-    {
-        $this->outputInterface->expects(self::once())->method('writeln')
-            ->will(self::returnCallback(function ($message) {
-                self::assertStringEndsWith('<error>Hanging back! Received 2 segments from the socket buffer. Will only return the latest status.</error>', $message);
-            }));
-
-        $this->socket->expects(self::once())->method('listen')
-            ->willReturn('0 0 0,1.1 -2.2 3.3,abc');
-
-        $result = $this->repository->getLatestStatus();
-        self::assertInstanceOf(GyroStatus::class, $result);
-        self::assertEquals(1.1, $result->getYaw());
-        self::assertEquals(2.2, $result->getPitch());
-        self::assertEquals(3.3, $result->getRoll());
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Invalid low level gyro message: Missing message separator
-     */
-    public function test_getLatestStatus_invalidData_missingSeparator()
-    {
-        $this->socket->expects(self::once())->method('listen')
-            ->willReturn('');
-
-        $this->repository->getLatestStatus();
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Invalid low level gyro message: Value Count is not correct!
-     */
-    public function test_getLatestStatus_invalidData_valueMissing()
-    {
-        $this->socket->expects(self::once())->method('listen')
-            ->willReturn('1.1 2.2,abc');
-
-        $this->repository->getLatestStatus();
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Invalid low level gyro message: Value 0 is not numeric!
-     */
-    public function test_getLatestStatus_invalidData_firstValueNotFloat()
-    {
-        $this->socket->expects(self::once())->method('listen')
-            ->willReturn('abc 1 2,');
-
-        $this->repository->getLatestStatus();
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Invalid low level gyro message: Value 1 is not numeric!
-     */
-    public function test_getLatestStatus_invalidData_secondValueNotFloat()
-    {
-        $this->socket->expects(self::once())->method('listen')
-            ->willReturn('1 abc 2,');
-
-        $this->repository->getLatestStatus();
-    }
-
-    /**
-     * @expectedException \InvalidArgumentException
-     * @expectedExceptionMessage Invalid low level gyro message: Value 2 is not numeric!
-     */
-    public function test_getLatestStatus_invalidData_thirdValueNotFloat()
-    {
-        $this->socket->expects(self::once())->method('listen')
-            ->willReturn('1 2 abc,');
-
-        $this->repository->getLatestStatus();
+        $this->repository->fetchGyroStatus();
     }
 }

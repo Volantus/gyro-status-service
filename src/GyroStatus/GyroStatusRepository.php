@@ -1,10 +1,13 @@
 <?php
 namespace Volantus\GyroStatusService\Src\GyroStatus;
 
-use Symfony\Component\Console\Output\OutputInterface;
-use Volantus\FlightBase\Src\General\CLI\OutputOperations;
+use Volantus\FlightBase\Src\Client\Server;
+use Volantus\FlightBase\Src\General\Generic\GenericInternalMessage;
 use Volantus\FlightBase\Src\General\GyroStatus\GyroStatus;
-use Volantus\FlightBase\Src\General\Network\Socket;
+use Volantus\FlightBase\Src\General\MSP\MSPRequestMessage;
+use Volantus\FlightBase\Src\General\MSP\MSPResponseMessage;
+use Volantus\MSPProtocol\Src\Protocol\Request\Attitude as AttitudeRequest;
+use Volantus\MSPProtocol\Src\Protocol\Response\Attitude as AttitudeResponse;
 
 /**
  * Class GyroStatusRepository
@@ -13,65 +16,88 @@ use Volantus\FlightBase\Src\General\Network\Socket;
  */
 class GyroStatusRepository
 {
-    use OutputOperations;
+    /**
+     * Connections ready for MSP requests
+     *
+     * @var Server[]
+     */
+    private $freeConnections = [];
 
     /**
-     * @var Socket
+     * @var GyroStatus[]
      */
-    private $socket;
-
-    /**
-     * @var GyroStatus
-     */
-    private $zeroLevel;
+    private $currentGyroStatus = [];
 
     /**
      * GyroStatusRepository constructor.
      *
-     * @param OutputInterface $output
-     * @param GyroStatus      $zeroLevel
-     * @param Socket          $socket
+     * @param Server[] $connections
      */
-    public function __construct(OutputInterface $output, GyroStatus $zeroLevel, Socket $socket = null)
+    public function __construct(array $connections = [])
     {
-        $this->socket = $socket ?: new Socket('127.0.0.1', 5555);
-        $this->output = $output;
-        $this->zeroLevel = $zeroLevel;
+        foreach ($connections as $connection) {
+            $this->addServer($connection);
+        }
+    }
+
+    public function fetchGyroStatus()
+    {
+        if (!empty($this->freeConnections)) {
+            $request = new MSPRequestMessage(3, new AttitudeRequest());
+            $request = new GenericInternalMessage($request);
+            $request = $request->toRawMessage();
+            $request = json_encode($request);
+
+            foreach ($this->freeConnections as $objHash => $connection) {
+                $connection->send($request);
+                unset($this->freeConnections[$objHash]);
+            }
+        }
     }
 
     /**
+     * @param Server             $server
+     * @param MSPResponseMessage $message
+     *
      * @return GyroStatus
      */
-    public function getLatestStatus() : GyroStatus
+    public function onMspResponse(Server $server, MSPResponseMessage $message): GyroStatus
     {
-        $data = $this->socket->listen();
+        $objHash = spl_object_hash($server);
+        $this->freeConnections[$objHash] = $server;
 
-        $segments = explode(',', $data);
-        if (count($segments) < 2) {
-            throw new \InvalidArgumentException('Invalid low level gyro message: Missing message separator');
-        }
-        array_pop($segments);
+        /** @var AttitudeResponse $attitudeResponse */
+        $attitudeResponse = $message->getMspResponse();
+        $this->currentGyroStatus[$objHash] = new GyroStatus(
+            $attitudeResponse->getHeading(),
+            $attitudeResponse->getYAngle() / 10,
+            $attitudeResponse->getXAngle() / 10
+        );
 
-        if (count($segments) > 1) {
-            $this->writeErrorLine('GyroStatusRepository', 'Hanging back! Received ' . count($segments) . ' segments from the socket buffer. Will only return the latest status.');
-        }
+        return $this->currentGyroStatus[$objHash];
+    }
 
-        $values = explode(' ', end($segments));
+    /**
+     * @param Server $server
+     */
+    public function addServer(Server $server)
+    {
+        $this->freeConnections[spl_object_hash($server)] = $server;
+    }
 
-        if (count($values) != 3) {
-            throw new \InvalidArgumentException('Invalid low level gyro message: Value Count is not correct!');
-        }
+    /**
+     * @param Server $server
+     */
+    public function removeServer(Server $server)
+    {
+        unset($this->freeConnections[spl_object_hash($server)]);
+    }
 
-        foreach ($values as $i => $value) {
-            if (!is_numeric($value)) {
-                throw new \InvalidArgumentException('Invalid low level gyro message: Value ' . $i . ' is not numeric!');
-            }
-        }
-
-        $yaw  = ((float) $values[0]) - $this->zeroLevel->getYaw();
-        $roll = ((float) $values[2]) - $this->zeroLevel->getRoll();
-        $pitch = (-(float) $values[1]) - $this->zeroLevel->getPitch();
-
-        return new GyroStatus($yaw, $roll, $pitch);
+    /**
+     * @return GyroStatus[]
+     */
+    public function getCurrentGyroStatus(): array
+    {
+        return array_values($this->currentGyroStatus);
     }
 }
