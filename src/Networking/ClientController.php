@@ -4,6 +4,7 @@ namespace Volantus\GyroStatusService\Src\Networking;
 use Symfony\Component\Console\Output\OutputInterface;
 use Volantus\FlightBase\Src\Client\ClientService;
 use Volantus\FlightBase\Src\Client\Server;
+use Volantus\FlightBase\Src\Server\Messaging\MessageService;
 
 /**
  * Class ClientController
@@ -20,7 +21,7 @@ class ClientController extends \Volantus\FlightBase\Src\Client\ClientController
      */
     public function __construct(OutputInterface $output, ClientService $service = null)
     {
-        parent::__construct($output, $service);
+        parent::__construct($output, $service ?: new MessageHandler($output, new MessageService()));
 
         $this->connectRelayServer();
         $this->connectMspServer();

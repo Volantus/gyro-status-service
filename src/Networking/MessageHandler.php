@@ -1,7 +1,7 @@
 <?php
 namespace Volantus\GyroStatusService\Src\Networking;
 
-use React\EventLoop\ExtEventLoop;
+use React\EventLoop\LoopInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Volantus\FlightBase\Src\Client\ClientService;
 use Volantus\FlightBase\Src\Client\Server;
@@ -105,9 +105,9 @@ class MessageHandler extends ClientService
     }
 
     /**
-     * @param ExtEventLoop $loop
+     * @param LoopInterface $loop
      */
-    public function setLoop(ExtEventLoop $loop)
+    public function setLoop(LoopInterface $loop)
     {
         parent::setLoop($loop);
 
