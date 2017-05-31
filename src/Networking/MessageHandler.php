@@ -96,7 +96,7 @@ class MessageHandler extends ClientService
         parent::setLoop($loop);
 
         $this->loop->addPeriodicTimer(0.1, function () {
-           $this->repository->fetchGyroStatus();
+           $this->repository->sendRequests();
             $this->writeInfoLine('MessageHandler', 'Sent MSP request for attitude');
         });
     }
