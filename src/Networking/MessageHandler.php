@@ -58,25 +58,9 @@ class MessageHandler extends ClientService
 
             if ($payload->getMspResponse() instanceof Attitude) {
                 $gyroStatus = $this->repository->onMspResponse($server, $payload);
-                $this->sendGyroStatus($gyroStatus);
+                $this->sendToRelayServers($gyroStatus);
                 $this->writeGreenLine('MessageHandler', 'Received MSP attitude response from server ' . $server->getRole());
             }
-        }
-    }
-
-    /**
-     * @param GyroStatus $gyroStatus
-     */
-    private function sendGyroStatus(GyroStatus $gyroStatus)
-    {
-        $message = json_encode($gyroStatus->toRawMessage());
-
-        if (isset($this->servers[Server::ROLE_RELAY_SERVER_A])) {
-            $this->servers[Server::ROLE_RELAY_SERVER_A]->send($message);
-        }
-
-        if (isset($this->servers[Server::ROLE_RELAY_SERVER_B])) {
-            $this->servers[Server::ROLE_RELAY_SERVER_B]->send($message);
         }
     }
 
@@ -87,7 +71,7 @@ class MessageHandler extends ClientService
     {
         parent::addServer($server);
 
-        if ($server->getRole() == Server::ROLE_MSP_BROKER_A || $server->getRole() == Server::ROLE_MSP_BROKER_B) {
+        if ($server->isMspServer()) {
             $this->repository->addServer($server);
         }
     }
@@ -99,7 +83,7 @@ class MessageHandler extends ClientService
     {
         parent::removeServer($server);
 
-        if ($server->getRole() == Server::ROLE_MSP_BROKER_A || $server->getRole() == Server::ROLE_MSP_BROKER_B) {
+        if ($server->isMspServer()) {
             $this->repository->removeServer($server);
         }
     }
