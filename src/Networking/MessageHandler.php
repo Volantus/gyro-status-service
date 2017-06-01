@@ -3,10 +3,9 @@ namespace Volantus\GyroStatusService\Src\Networking;
 
 use React\EventLoop\LoopInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Volantus\FlightBase\Src\Client\ClientService;
+use Volantus\FlightBase\Src\Client\MspClientService;
 use Volantus\FlightBase\Src\Client\Server;
 use Volantus\FlightBase\Src\General\Generic\IncomingGenericInternalMessage;
-use Volantus\FlightBase\Src\General\GyroStatus\GyroStatus;
 use Volantus\FlightBase\Src\General\MSP\MSPResponseMessage;
 use Volantus\FlightBase\Src\General\Role\ClientRole;
 use Volantus\FlightBase\Src\Server\Messaging\IncomingMessage;
@@ -19,7 +18,7 @@ use Volantus\MSPProtocol\Src\Protocol\Response\Attitude;
  *
  * @package Volantus\GyroStatusService\Src\GyroStatus
  */
-class MessageHandler extends ClientService
+class MessageHandler extends MspClientService
 {
     /**
      * @var int
@@ -29,7 +28,7 @@ class MessageHandler extends ClientService
     /**
      * @var GyroStatusRepository
      */
-    private $repository;
+    private $gyroStatusRepository;
 
     /**
      * MessageHandler constructor.
@@ -41,7 +40,8 @@ class MessageHandler extends ClientService
     public function __construct(OutputInterface $output, MessageService $messageService, GyroStatusRepository $gyroStatusRepository = null)
     {
         parent::__construct($output, $messageService);
-        $this->repository = $gyroStatusRepository ?: new GyroStatusRepository();
+        $this->gyroStatusRepository = $gyroStatusRepository ?: new GyroStatusRepository();
+        $this->mspRepositories[] = $this->gyroStatusRepository;
     }
 
     /**
@@ -57,34 +57,10 @@ class MessageHandler extends ClientService
             $payload = $incomingMessage->getPayload();
 
             if ($payload->getMspResponse() instanceof Attitude) {
-                $gyroStatus = $this->repository->onMspResponse($server, $payload);
+                $gyroStatus = $this->gyroStatusRepository->onMspResponse($server, $payload);
                 $this->sendToRelayServers($gyroStatus);
                 $this->writeGreenLine('MessageHandler', 'Received MSP attitude response from server ' . $server->getRole());
             }
-        }
-    }
-
-    /**
-     * @param Server $server
-     */
-    public function addServer(Server $server)
-    {
-        parent::addServer($server);
-
-        if ($server->isMspServer()) {
-            $this->repository->addServer($server);
-        }
-    }
-
-    /**
-     * @param Server $server
-     */
-    public function removeServer(Server $server)
-    {
-        parent::removeServer($server);
-
-        if ($server->isMspServer()) {
-            $this->repository->removeServer($server);
         }
     }
 
@@ -96,7 +72,7 @@ class MessageHandler extends ClientService
         parent::setLoop($loop);
 
         $this->loop->addPeriodicTimer(0.1, function () {
-           $this->repository->sendRequests();
+           $this->gyroStatusRepository->sendRequests();
             $this->writeInfoLine('MessageHandler', 'Sent MSP request for attitude');
         });
     }

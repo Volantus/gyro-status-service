@@ -9,6 +9,7 @@ use Volantus\FlightBase\Src\General\GyroStatus\GyroStatus;
 use Volantus\FlightBase\Src\General\MSP\MSPResponseMessage;
 use Volantus\FlightBase\Src\General\Role\ClientRole;
 use Volantus\FlightBase\Tests\Client\ClientServiceTest;
+use Volantus\FlightBase\Tests\Client\MspClientServiceTest;
 use Volantus\GyroStatusService\Src\GyroStatus\GyroStatusRepository;
 use Volantus\MSPProtocol\Src\Protocol\Response\Attitude;
 
@@ -17,7 +18,7 @@ use Volantus\MSPProtocol\Src\Protocol\Response\Attitude;
  *
  * @package Volantus\GyroStatusService\Src\Networking
  */
-class MessageHandlerTest extends ClientServiceTest
+class MessageHandlerTest extends MspClientServiceTest
 {
     /**
      * @var GyroStatusRepository|\PHPUnit_Framework_MockObject_MockObject
@@ -98,47 +99,5 @@ class MessageHandlerTest extends ClientServiceTest
             ->method('send');
 
         $this->service->newMessage($mspServerConnection, 'correct');
-    }
-
-    public function test_addServer_mspServer_addedToRepository()
-    {
-        $server = new Server($this->connection, Server::ROLE_MSP_BROKER_A);
-
-        $this->repository->expects(self::once())
-            ->method('addServer')
-            ->with(self::equalTo($server));
-
-        $this->service->addServer($server);
-    }
-
-    public function test_addServer_relayServer_notAddedToRepository()
-    {
-        $server = new Server($this->connection, Server::ROLE_RELAY_SERVER_A);
-
-        $this->repository->expects(self::never())
-            ->method('addServer');
-
-        $this->service->addServer($server);
-    }
-
-    public function test_removeServer_mspServer_removedFromRepository()
-    {
-        $server = new Server($this->connection, Server::ROLE_MSP_BROKER_A);
-
-        $this->repository->expects(self::once())
-            ->method('removeServer')
-            ->with(self::equalTo($server));
-
-        $this->service->removeServer($server);
-    }
-
-    public function test_removeServer_relayServer_repositoryNotCalled()
-    {
-        $server = new Server($this->connection, Server::ROLE_RELAY_SERVER_A);
-
-        $this->repository->expects(self::never())
-            ->method('removeServer');
-
-        $this->service->removeServer($server);
     }
 }
