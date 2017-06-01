@@ -2709,16 +2709,16 @@
         },
         {
             "name": "volantus/flight-base",
-            "version": "1.3.8",
+            "version": "1.3.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Volantus/flight-base.git",
-                "reference": "97d2bc2838a5ad825a97c4703caf789ba3abbf42"
+                "reference": "c0315b17ae7761cda410debf1c8f2201e2d5a987"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Volantus/flight-base/zipball/97d2bc2838a5ad825a97c4703caf789ba3abbf42",
-                "reference": "97d2bc2838a5ad825a97c4703caf789ba3abbf42",
+                "url": "https://api.github.com/repos/Volantus/flight-base/zipball/c0315b17ae7761cda410debf1c8f2201e2d5a987",
+                "reference": "c0315b17ae7761cda410debf1c8f2201e2d5a987",
                 "shasum": ""
             },
             "require": {
@@ -2747,7 +2747,7 @@
                 }
             ],
             "description": "Base library for all Volantus flight stack modules",
-            "time": "2017-06-01 21:57:56"
+            "time": "2017-06-01 22:07:05"
         },
         {
             "name": "volantus/msp-protocol",
