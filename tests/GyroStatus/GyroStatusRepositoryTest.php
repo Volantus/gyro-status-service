@@ -60,6 +60,6 @@ class GyroStatusRepositoryTest extends MspRepositoryTest
      */
     protected function getExpectedDecodedResult()
     {
-        return new GyroStatus(120, 70, -152.5);
+        return new GyroStatus(120, -152.5, 70);
     }
 }

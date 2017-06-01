@@ -38,8 +38,8 @@ class GyroStatusRepository extends MspRepository
     {
         return new GyroStatus(
             $response->getHeading(),
-            $response->getYAngle() / 10,
-            $response->getXAngle() / 10
+            $response->getXAngle() / 10,
+            $response->getYAngle() / 10
         );
     }
 }
