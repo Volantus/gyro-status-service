@@ -28,6 +28,7 @@ class MessageHandlerTest extends MspClientServiceTest
     protected function setUp()
     {
         $this->repository = $this->getMockBuilder(GyroStatusRepository::class)->disableOriginalConstructor()->getMock();
+        $this->mspRepositories[] = $this->repository;
         parent::setUp();
     }
 
