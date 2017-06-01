@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "11a890f142917320ea4628f36341d45e",
-    "content-hash": "0cb46a6a4dbb7e42b72986d11dd93a54",
+    "hash": "5712aba704509008c8ebf8ec46f36452",
+    "content-hash": "bbdd56b5928c606abc249a294a821865",
     "packages": [
         {
             "name": "cboden/ratchet",
@@ -2709,16 +2709,16 @@
         },
         {
             "name": "volantus/flight-base",
-            "version": "1.3.5",
+            "version": "1.3.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Volantus/flight-base.git",
-                "reference": "bcc525369d03fe23f044ca908a7ce2583f178ccb"
+                "reference": "003416c7d1c0e11a89bdfecca1ac1e1ed1aaaff7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Volantus/flight-base/zipball/bcc525369d03fe23f044ca908a7ce2583f178ccb",
-                "reference": "bcc525369d03fe23f044ca908a7ce2583f178ccb",
+                "url": "https://api.github.com/repos/Volantus/flight-base/zipball/003416c7d1c0e11a89bdfecca1ac1e1ed1aaaff7",
+                "reference": "003416c7d1c0e11a89bdfecca1ac1e1ed1aaaff7",
                 "shasum": ""
             },
             "require": {
@@ -2747,7 +2747,7 @@
                 }
             ],
             "description": "Base library for all Volantus flight stack modules",
-            "time": "2017-06-01 19:33:13"
+            "time": "2017-06-01 19:57:30"
         },
         {
             "name": "volantus/msp-protocol",
