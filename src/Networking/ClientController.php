@@ -23,41 +23,7 @@ class ClientController extends \Volantus\FlightBase\Src\Client\ClientController
     {
         parent::__construct($output, $service ?: new MessageHandler($output, new MessageService()));
 
-        $this->connectRelayServer();
-        $this->connectMspServer();
-    }
-
-    private function connectRelayServer()
-    {
-        $connectionCountBefore = count($this->connections);
-
-        if (getenv('RELAY_SERVER_A') !== false) {
-            $this->registerConnection(Server::ROLE_RELAY_SERVER_A, getenv('RELAY_SERVER_A'));
-        }
-
-        if (getenv('RELAY_SERVER_B') !== false) {
-            $this->registerConnection(Server::ROLE_RELAY_SERVER_B, getenv('RELAY_SERVER_B'));
-        }
-
-        if ($connectionCountBefore == count($this->connections)) {
-            throw new \RuntimeException('Atleast one relay server needs to be configured');
-        }
-    }
-
-    private function connectMspServer()
-    {
-        $connectionCountBefore = count($this->connections);
-
-        if (getenv('MSP_SERVER_A') !== false) {
-            $this->registerConnection(Server::ROLE_MSP_BROKER_A, getenv('MSP_SERVER_A'));
-        }
-
-        if (getenv('MSP_SERVER_B') !== false) {
-            $this->registerConnection(Server::ROLE_MSP_BROKER_B, getenv('MSP_SERVER_B'));
-        }
-
-        if ($connectionCountBefore == count($this->connections)) {
-            throw new \RuntimeException('Atleast one MSP server needs to be configured');
-        }
+        $this->connectToRelayServer();
+        $this->connectToMspServer();
     }
 }
